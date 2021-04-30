@@ -1,13 +1,18 @@
-canvas = document.getElementById('flappy_bird');
-canvas_context = canvas.getContext('2d');
+"use strict";
+
+let canvas = document.getElementById('game_canvas');
+let canvas_context = canvas.getContext('2d');
 
 canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 
 // constants
-GAME_WIDTH =  960; // should be equal to or less than canvas width
-GAME_HEIGHT =  540; // should be equal to or less than canvas height
+const GAME_WIDTH =  960; // should be equal to or less than canvas width
+const GAME_HEIGHT =  540; // should be equal to or less than canvas height
 
+let delta_time = 0; // the time between frames in seconds
+let paused = true; // controls wether the game is paused or not
+let timer = 0; // time in seconds
 
 // intial setup
 function setup()
