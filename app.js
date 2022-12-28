@@ -1,150 +1,94 @@
-"use strict";
+const Application = PIXI.Application;
+const Sprite = PIXI.Sprite;
+const AnimatedSprite = PIXI.AnimatedSprite;
+const Assets = PIXI.Assets;
+const ticker = PIXI.Ticker.shared;
 
-let canvas = document.getElementById('game_canvas');
-let canvas_context = canvas.getContext('2d');
+const sheet = await Assets.load('./assets/spritesheet.json');
+const critterArray = [sheet.textures['critter.png'], sheet.textures['critter_2.png']];
+const critters = new Array();
 
-canvas.width = canvas.offsetWidth;
-canvas.height = canvas.offsetHeight;
+const SCREEN_WIDTH = 800//screen.availWidth - 32;
+const SCREEN_HEIGHT = 800//screen.availHeight - 70;
+const ENEMY_SPAWN_COUNT = 23;
+const ENEMY_MOVE_SPEED = 8;
+const PLAYER_MOVE_SPEED = 3;
 
-// constants
-const GAME_WIDTH =  960; // should be equal to or less than canvas width
-const GAME_HEIGHT =  540; // should be equal to or less than canvas height
+let keyCode = 0;
 
-let delta_time = 0; // the time between frames in seconds
-let paused = true; // controls wether the game is paused or not
-let timer = 0; // time in seconds
+// load sprites from spritesheet
+const player = new Sprite(sheet.textures['target.png']);
+const target = new Sprite(sheet.textures['player.png']);
 
-// intial setup
-function setup()
-{
-    document.addEventListener("keydown", keyPressed);
-    document.addEventListener("keyup", keyUp);
-    
-    draw();
-}
+const app = new Application({
+   // width: 500,
+   // height: 500,
+    transparent: false,
+    antialias: true
+});
+ticker.autoStart = false;
 
-// physics update
-function update()
-{
+document.addEventListener('keydown', (x)=>{
+    keyCode = x.keyCode;
+    // movePlayer(x.keyCode, player, PLAYER_MOVE_SPEED);
+})
 
-}
+const spawnStage = (count, app, ) => {
 
-// draw update
-let old_times_stamp = 0;
-function draw(time_stamp)
-{
-    delta_time = (time_stamp - old_times_stamp) / 1000;
-    old_times_stamp = time_stamp;
-    if (!isNaN(delta_time))
-    {
-        timer += delta_time;
+    target.x = randomInt(0, SCREEN_WIDTH);
+    target.y = randomInt(0, SCREEN_HEIGHT);
+
+    for (let i=0; i<count; i++) {
+        critters.push(new AnimatedSprite(critterArray));
+    }
+    for (let critter of critters) {
+        critter.animationSpeed = 0.03;
+        critter.x = randomInt(0, SCREEN_WIDTH);
+        critter.y = randomInt(0, SCREEN_HEIGHT);
+        critter.play();
+
+        // render on stage
+        player.x = SCREEN_WIDTH;
+        player.y = SCREEN_HEIGHT;
+
+        app.stage.addChild(critter);
     }
 
-    if (!paused)
-    {
-        update();
-    }
-
-    window.requestAnimationFrame(draw);
+    app.stage.addChild(player, target);
 }
 
-setup();
+app.renderer.background.color = 0x000;
+app.renderer.resize(window.innerWidth, window.innerHeight)
+spawnStage(ENEMY_SPAWN_COUNT, app)
 
-// keyboard input
-let up_key_down = false;
-let down_key_down = false;
-let right_key_down = false;
-let left_key_down = false;
-let space_key_down = false;
-let enter_key_down = false;
-let zero_key_down = false;
-let one_key_down = false;
+document.body.appendChild(app.view);
 
-function keyUp(evt)
-{
-    switch(evt.keyCode)
-    {
-        case 13:
-            enter_key_down = false;
-            break;
-        case 32:
-            space_key_down = false;
-            break;
-        case 37:
-            left_key_down = false;
-            break;
-        case 38:
-            up_key_down = false;
-            break;
-        case 39:
-            right_key_down = false;
-            break;
-        case 40:
-            down_key_down = false;
-            break;
-        case 48:
-            zero_key_down = false;
-            break;
-        case 49:
-            one_key_down = false;
-            break;
+// MAIN GAME LOOP
+ticker.stop();
+function runGameLoop(time) {
+    ticker.update(time);
+
+    // move enemies randomly
+    for (let critter of critters) {
+        updateEnemyPosition(critter, ENEMY_MOVE_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT)
     }
-    
+
+    movePlayer(keyCode, player, PLAYER_MOVE_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    requestAnimationFrame(runGameLoop);
+
+    if (hasReachedTarget(player, target))
+    {
+        document.querySelector('.overlay').style.display = 'block';
+        document.querySelector('.win').style.display = 'block';
+    }
+
+    if (hasCollided(player, critters))
+    {
+        document.querySelector('.overlay').style.display = 'block';
+        document.querySelector('.lose').style.display = 'block';
+    }
+
 }
 
-function keyPressed(evt)
-{   
-
-    switch(evt.keyCode)
-    {
-        case 13:
-            if (!enter_key_down)
-            {  
-                paused = false;
-                enter_key_down = true;
-            }
-            break;
-        case 32:
-            if (!space_key_down && !paused)
-            {  
-                space_key_down = true;
-            }
-            break;
-        case 37:
-            if (!left_key_down && !paused)
-            {  
-                left_key_down = true;
-            }
-            break;
-        case 38:
-            if (!up_key_down && !paused)
-            {
-                up_key_down = true;
-            }
-            break;
-        case 39:
-            if (!right_key_down && !paused)
-            {             
-                right_key_down = true;
-            }
-            break;
-        case 40:
-            if (!down_key_down && !paused)
-            {
-                down_key_down = true;
-            }
-            break;
-        case 48:
-            if (!zero_key_down && !paused)
-            {
-                zero_key_down = true;
-            }
-            break;
-        case 49:
-            if (!one_key_down && !paused)
-            {
-                one_key_down = true;
-            }
-            break;
-    }
-}
+runGameLoop(performance.now());

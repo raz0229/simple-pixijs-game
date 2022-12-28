@@ -1,17 +1,11 @@
-body {
+* {
+  padding: 0;
   margin: 0;
-  background-color: #FFFFFF;
-  font-family: Roboto Condensed;
 }
 
 #title {
   text-align: center;
+  font-family: Roboto Condensed;
 }
 
-#game_canvas {
-  width: 960px;
-  height: 600px;
-  display: block;
-  margin: 0 auto;
-}
 /*# sourceMappingURL=styles.css.map */

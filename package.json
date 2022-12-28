@@ -1,0 +1,22 @@
+{
+  "name": "html5-game",
+  "version": "1.0.0",
+  "description": "simple game",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/murtada58/html5_canvas_game_template.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/murtada58/html5_canvas_game_template/issues"
+  },
+  "homepage": "https://github.com/murtada58/html5_canvas_game_template#readme",
+  "dependencies": {
+    "pixi.js": "^7.0.5"
+  }
+}
